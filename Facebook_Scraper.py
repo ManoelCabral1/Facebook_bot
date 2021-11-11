@@ -29,7 +29,7 @@ time.sleep(2)
 bot = Face_bot(driver, post_link)
 
 #login
-bot.login('manoel.cabral1989@outlook.com', 'tobias@123')
+bot.login('email.com', 'password')
 time.sleep(10)
 
 users, comments = bot.load_more_comment(count)
