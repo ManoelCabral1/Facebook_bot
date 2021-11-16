@@ -51,38 +51,59 @@ class Face_bot():
 
         return users
 
-    def load_more_comment(self,count: int) -> tuple:
+    def load_more_comment(self,count: int, layout=True) -> tuple:
         """Abrir popup de opções de comentários escolhe a opção todos os comentários  aperta o botão mais comentários 
         Coleta os comentários e usuários adiciona cada um em uma lista e retorna as duas listas numa tupla"""
         
         comments =[]
         users = []
+        i = 0
         #Abri o pop up de opções de comentários
         pop_up = self.driver.find_element_by_class_name('bp9cbjyn.j83agx80.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.h3fqq6jp').click()
         time.sleep(1)
         #Opções de comentários
         pop_up = self.driver.find_element_by_css_selector('div[style="transform: translate(0px, 0px);"]')
         options = pop_up.find_elements_by_css_selector('div[role="menuitem"]')
-        #Opção: mais comentários
+        #Opção: todos os comentários
         options[2].click()
         time.sleep(2)
         
-        #botão ver mais comentários
-        button = self.driver.find_element_by_xpath("//span[contains(text(), 'Ver mais')]")
-        self.driver.execute_script('arguments[0].scrollIntoView(true);', button)
-        i = 0
-        while i < count:
-              try:
-                  comments.extend(self.getComments())
-                  users.extend(self.getUsers())
-                  button.click()
-                  time.sleep(3)
-                  self.driver.execute_script('arguments[0].scrollIntoView(true);', button)
-              except (NoSuchElementException, StaleElementReferenceException) as e:
-                  print("Botão não está visível!")
-                  pass
+        # Para layout do post tipo 1: com comentários na lateral
+        if(layout):
+            #botão ver mais comentários
+            button = self.driver.find_element_by_xpath("//span[contains(text(), 'Ver mais')]")
+            self.driver.execute_script('arguments[0].scrollIntoView(true);', button)
+    
+            while i < count:
+                try:
+                    comments.extend(self.getComments())
+                    users.extend(self.getUsers())
+                    button.click()
+                    time.sleep(3)
+                    self.driver.execute_script('arguments[0].scrollIntoView(true);', button)
+                except (NoSuchElementException, StaleElementReferenceException) as e:
+                    print("Botão não está visível!")
+                    pass
 
+                i +=1
+            return (users, comments)
+        
+        # Para layout do post tipo 2: com comentários abaixo
+        while i < count:
+              post_container = self.driver.find_element_by_class_name('d2edcug0.oh7imozk.tr9rh885.abvwweq7.ejjq64ki')
+              button = post_container.find_element_by_xpath("//span[contains(text(), 'Ver mais comentários')]")
+
+              try:
+                    comments.extend(self.getComments())
+                    users.extend(self.getUsers())
+                    button.click()
+                    time.sleep(3)
+                    button = post_container.find_element_by_xpath("//span[contains(text(), 'Ver mais comentários')]")
+              except (NoSuchElementException, StaleElementReferenceException) as e:
+                    print("Botão não está visível!")
+                    pass
               i +=1
+
         return (users, comments)
 
     def close(self) -> None:
